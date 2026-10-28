@@ -32,7 +32,6 @@ N_ITER = 1000
 
 # Define file paths
 base_path = Path(f"{REPO_ROOT}/Simulations/Acute")
-idu_path = Path(f"{REPO_ROOT}/Simulations/IDU/idu.dbf")
 realign_idu_path = base_path / "Untargeted-Acute-Realign" / "Run0" / "idu_Year2101_Untargeted-Acute-Realign_Run0.dbf"
 
 files = {
@@ -64,81 +63,58 @@ colors = {'Baseline': '#FF0000', 'Protect': '#00FF00', 'Realign': '#0000FF'}  # 
 darker_colors = {'Baseline': '#B20000', 'Protect': '#008000', 'Realign': '#000080'}  # darker pure red, green, blue
 
 
-# Read IDU data for normalization (robust, only needed fields)
-import struct
-needed_fields = ['impr_value', 'TotalPop', 'BLDGVALUE']
-field_types = {}
-field_offsets = {}
-field_lengths = {}
-print("Reading IDU data for normalization (robust method)...")
-with open(idu_path, 'rb') as f:
-    header = f.read(32)
-    num_records = struct.unpack('<I', header[4:8])[0]
-    header_len = struct.unpack('<H', header[8:10])[0]
-    record_len = struct.unpack('<H', header[10:12])[0]
-    # Read field descriptors
-    fields = []
-    while True:
-        field_desc = f.read(32)
-        if field_desc[0] == 0x0D:
-            break
-        name = field_desc[:11].decode('ascii', errors='ignore').replace('\x00', '').strip()
-        ftype = chr(field_desc[11])
-        flen = field_desc[16]
-        fields.append((name, ftype, flen))
-    # Find offsets for needed fields
-    offset = 1  # first byte is deletion flag
-    for name, ftype, flen in fields:
-        if name in needed_fields:
-            field_types[name] = ftype
-            field_offsets[name] = offset
-            field_lengths[name] = flen
-        offset += flen
-    # Read records
-    f.seek(header_len)
-    data = {k: [] for k in needed_fields}
-    for _ in range(num_records):
-        rec = f.read(record_len)
-        if not rec or rec[0] == 0x2A:  # deleted record
-            continue
-        for k in needed_fields:
-            start = field_offsets[k]
-            end = start + field_lengths[k]
-            raw = rec[start:end]
-            try:
-                val = raw.decode('latin1', errors='ignore').strip()
-                if val == '' or val is None:
-                    data[k].append(np.nan)
-                else:
-                    data[k].append(float(val))
-            except Exception:
-                data[k].append(np.nan)
-idu_df = pd.DataFrame(data)
-idu_df = idu_df.dropna(subset=needed_fields)
+# Identify building records using the improvement value in the Acute Baseline
+# scenario IDU. Record order must match the damage-detail CSV row order.
+# The baseline totals are read from the existing results CSV.
+baseline_idu_dir = base_path / "Acute-Baseline" / "Run0"
+baseline_idu_candidates = sorted(baseline_idu_dir.glob("idu_Year*_Acute-Baseline_Run0.dbf"))
+if not baseline_idu_candidates:
+    raise FileNotFoundError(
+        f"No Acute Baseline scenario IDU found in {baseline_idu_dir}. "
+        "An IDU with the original building record order and impr_value field "
+        "is needed to select the building rows in the damage-detail CSVs."
+    )
+# Use the earliest available scenario snapshot; verify its building count
+# against the reference totals before processing damage-state results.
+baseline_idu_path = baseline_idu_candidates[0]
+print(f"Reading building improvement values: {baseline_idu_path}")
+baseline_idu_records = DBF(baseline_idu_path, encoding='latin1', load=False)
+if 'impr_value' not in baseline_idu_records.field_names:
+    raise KeyError(f"Required field impr_value missing in {baseline_idu_path}")
+# Retain row positions: do not drop records with missing improvement values.
+improvement_values = pd.to_numeric(
+    pd.Series((rec.get('impr_value') for rec in baseline_idu_records)),
+    errors='coerce'
+)
+building_indices = improvement_values.index[improvement_values > 10000].tolist()
+print(f"Number of buildings (impr_value > 10000): {len(building_indices)}")
 
-# Read Realign IDU data to get REMOVED buildings
+baseline_stats_path = output_path / "TotalNumber_Statistics.csv"
+baseline_stats = pd.read_csv(baseline_stats_path)
+required_columns = {'Metric', 'Value'}
+if not required_columns.issubset(baseline_stats.columns):
+    raise ValueError(f"Expected Metric and Value columns in {baseline_stats_path}")
+values = baseline_stats.set_index('Metric')['Value']
+for metric in ('Total_Buildings', 'Total_Population', 'Total_Property_Value'):
+    if metric not in values.index:
+        raise ValueError(f"Missing {metric} in {baseline_stats_path}")
+total_buildings = float(values['Total_Buildings'])
+total_population = float(values['Total_Population'])
+total_property_value = float(values['Total_Property_Value']) * 1e6  # stored in million $
+if len(building_indices) != int(total_buildings):
+    raise ValueError(
+        f"Building count in {baseline_idu_path} ({len(building_indices)}) "
+        f"does not match {baseline_stats_path} ({int(total_buildings)}). "
+        "Check the scenario snapshot and IDU row alignment."
+    )
+
+# Identify removed buildings from the Realign scenario IDU.
 print("Reading Realign IDU data for REMOVED buildings...")
 realign_idu_records = DBF(realign_idu_path, encoding='latin1')
 realign_idu_df = pd.DataFrame(iter(realign_idu_records))
-
-# Create mask for removed buildings (0 < REMOVED < 2070)
 removed_mask = (realign_idu_df['REMOVED'] > 0) & (realign_idu_df['REMOVED'] < 2070)
 removed_indices = realign_idu_df[removed_mask].index.tolist()
 print(f"Number of removed buildings for Realign: {len(removed_indices)}")
-
-# Create mask for buildings (impr_value > 10000) to filter damage data
-building_mask = idu_df['impr_value'] > 10000
-building_indices = idu_df[building_mask].index.tolist()
-print(f"Number of buildings (impr_value > 10000): {len(building_indices)}")
-
-# Calculate totals for normalization
-total_buildings = len(building_indices)
-total_population = idu_df['TotalPop'].sum()
-total_property_value = idu_df[idu_df['impr_value'] > 10000]['BLDGVALUE'].sum()
-
-print(f"Total buildings (impr_value > 10000): {total_buildings}")
-print(f"Total population: {total_population}")
-print(f"Total property value: ${total_property_value:,.2f}")
 print("="*80)
 
 # --- Helper function: create_boxplot ---
@@ -374,16 +350,7 @@ for policy in ['Baseline', 'Protect', 'Realign']:
 print("\n" + "="*80)
 print("Saving statistics and CoV results...")
 
-# Create baseline statistics summary
-baseline_stats = pd.DataFrame([
-    {'Metric': 'Total_Buildings', 'Value': total_buildings, 'Unit': 'count', 'Description': 'Total buildings with impr_value > 10000'},
-    {'Metric': 'Total_Population', 'Value': total_population, 'Unit': 'people', 'Description': 'Total population in Tillamook'},
-    {'Metric': 'Total_Property_Value', 'Value': total_property_value / 1e6, 'Unit': 'million $', 'Description': 'Total building value for buildings with impr_value > 10000'}
-])
-
-# Save baseline statistics
-baseline_stats.to_csv(output_path / "TotalNumber_Statistics.csv", index=False)
-print(f"Saved: {output_path / 'TotalNumber_Statistics.csv'}")
+# TotalNumber_Statistics.csv is a published input; never overwrite it.
 
 # Save per-simulation statistics results
 iter_columns = [f'Iter_{i}' for i in range(N_ITER)]
@@ -1357,7 +1324,6 @@ print("All figures, statistics, and Word documents have been saved successfully!
 print("="*80)
 print(f"\nOutput location: {output_path}")
 print("Files created:")
-print("  - TotalNumber_Statistics.csv (Total buildings, population, property value)")
 print("  - Statistics_Acute_PerSim.csv (Per-iteration values and summary stats for all metrics)")
 print("  - Fig1_Damage_State_Distribution.png")
 print("  - Fig2_Life_Safety_Distribution.png")

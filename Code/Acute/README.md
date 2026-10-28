@@ -1,10 +1,11 @@
+The detailed analysis uses the `impr_value > 10000` building selection from the Acute Baseline scenario IDU (earliest `idu_Year*_Acute-Baseline_Run0.dbf` in `Simulations/Acute/Acute-Baseline/Run0/`) and the `REMOVED` field from the Realign scenario IDU. The scenario IDU must retain the same record order as the building-damage CSVs. `Results/Acute/TotalNumber_Statistics.csv` supplies the reference building, population, and property-value totals.
+
 Steps:
 
 -1. Analyze simulations, plot DETAILED figures for checking, and save DETAILED RESULTS (per-simulation and averaged results) for plots by running:
 AcuteHazard_analysis_detailed_results_PerSim.py
 
 Outputs:
-TotalNumber_Statistics.csv
 Statistics_Acute_PerSim.csv (per-simulation and averaged)
 
 -2. Generate RESULTS for reporting in manuscript (physical and social) and calculating present value (PV) and net present value (NPV) results for economic analysis by running:

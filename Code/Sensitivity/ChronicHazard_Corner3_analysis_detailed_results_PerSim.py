@@ -3,7 +3,6 @@
 from pathlib import Path as _RepoPath
 REPO_ROOT = _RepoPath(__file__).resolve().parents[2].as_posix()
 import os
-import struct
 
 import numpy as np
 import pandas as pd
@@ -12,57 +11,15 @@ import pandas as pd
 base_dir = rf"{REPO_ROOT}/Simulations/Chronic/"
 corner1_dir = rf"{REPO_ROOT}/Simulations/Sensitivity/Chronic_Corner1/"
 corner2_dir = rf"{REPO_ROOT}/Simulations/Sensitivity/Chronic_Corner2/"
-idu_path = rf"{REPO_ROOT}/Simulations/IDU/idu.dbf"
 save_dir = rf"{REPO_ROOT}/Results/Sensitivity/"
 os.makedirs(save_dir, exist_ok=True)
 
-needed_fields = ['impr_value', 'TotalPop', 'BLDGVALUE']
-field_offsets = {}
-field_lengths = {}
-with open(idu_path, 'rb') as file:
-	header = file.read(32)
-	num_records = struct.unpack('<I', header[4:8])[0]
-	header_len = struct.unpack('<H', header[8:10])[0]
-	record_len = struct.unpack('<H', header[10:12])[0]
-	fields = []
-	while True:
-		field_desc = file.read(32)
-		if field_desc[0] == 0x0D:
-			break
-		name = field_desc[:11].decode('ascii', errors='ignore').replace('\x00', '').strip()
-		fields.append((name, field_desc[16]))
-	offset = 1
-	for name, field_length in fields:
-		if name in needed_fields:
-			field_offsets[name] = offset
-			field_lengths[name] = field_length
-		offset += field_length
-	file.seek(header_len)
-	data = {field: [] for field in needed_fields}
-	for _ in range(num_records):
-		record = file.read(record_len)
-		if not record or record[0] == 0x2A:
-			continue
-		for field in needed_fields:
-			start = field_offsets[field]
-			end = start + field_lengths[field]
-			try:
-				value = record[start:end].decode('latin1', errors='ignore').strip()
-				data[field].append(np.nan if not value else float(value))
-			except (TypeError, ValueError):
-				data[field].append(np.nan)
-
-idf = pd.DataFrame(data).dropna(subset=needed_fields)
-building_mask = idf['impr_value'] > 10000
-pd.DataFrame([
-	{'Metric': 'Total_Buildings', 'Value': building_mask.sum(), 'Unit': 'count'},
-	{'Metric': 'Total_Population', 'Value': idf['TotalPop'].sum(), 'Unit': 'people'},
-	{
-		'Metric': 'Total_Property_Value',
-		'Value': idf.loc[building_mask, 'BLDGVALUE'].sum() / 1e6,
-		'Unit': 'million $'
-	}
-]).to_csv(os.path.join(save_dir, 'TotalNumber_Corner3_Statistics_PerSim.csv'), index=False)
+baseline_totals_csv = os.path.join(save_dir, "TotalNumber_Corner3_Statistics_PerSim.csv")
+if not os.path.isfile(baseline_totals_csv):
+    raise FileNotFoundError(
+        f"Required existing input missing: {baseline_totals_csv}. "
+        "Obtain the published Results CSV; the baseline IDU DBF is not distributed."
+    )
 
 policies_dict = {
 	'Baseline': ['Chronic-Baseline-Low_idx', 'Chronic-Baseline-Med_idx', 'Chronic-Baseline-High_idx'],

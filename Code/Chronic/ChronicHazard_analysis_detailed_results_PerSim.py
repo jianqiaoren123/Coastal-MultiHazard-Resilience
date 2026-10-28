@@ -6,85 +6,23 @@ REPO_ROOT = _RepoPath(__file__).resolve().parents[2].as_posix()
 import os
 import pandas as pd
 import numpy as np
-import struct
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 from scipy.stats import t
-from dbfread import DBF
 import glob
 
 # --- Parameters and paths ---
 base_dir = rf"{REPO_ROOT}/Simulations/Chronic/"
-idu_path = rf"{REPO_ROOT}/Simulations/IDU/idu.dbf"
 save_dir = rf"{REPO_ROOT}/Results/Chronic/"
 os.makedirs(save_dir, exist_ok=True)
 
-# --- Data Preparation: Calculate and save total numbers (no simulation loop) ---
-# Read IDU dbf, calculate Total_Buildings, Total_Population, Total_Property_Value
-# Save to TotalNumber_Statistics.csv
+baseline_totals_csv = os.path.join(save_dir, "TotalNumber_Statistics.csv")
+if not os.path.isfile(baseline_totals_csv):
+    raise FileNotFoundError(
+        f"Required existing input missing: {baseline_totals_csv}. "
+        "Obtain the published Results CSV; the baseline IDU DBF is not distributed."
+    )
 
-needed_fields = ['impr_value', 'TotalPop', 'BLDGVALUE']
-field_types = {}
-field_offsets = {}
-field_lengths = {}
-
-with open(idu_path, 'rb') as f:
-    header = f.read(32)
-    num_records = struct.unpack('<I', header[4:8])[0]
-    header_len = struct.unpack('<H', header[8:10])[0]
-    record_len = struct.unpack('<H', header[10:12])[0]
-    # Read field descriptors
-    fields = []
-    while True:
-        field_desc = f.read(32)
-        if field_desc[0] == 0x0D:
-            break
-        name = field_desc[:11].decode('ascii', errors='ignore').replace('\x00', '').strip()
-        ftype = chr(field_desc[11])
-        flen = field_desc[16]
-        fields.append((name, ftype, flen))
-    # Find offsets for needed fields
-    offset = 1  # first byte is deletion flag
-    for name, ftype, flen in fields:
-        if name in needed_fields:
-            field_types[name] = ftype
-            field_offsets[name] = offset
-            field_lengths[name] = flen
-        offset += flen
-    # Read records
-    f.seek(header_len)
-    data = {k: [] for k in needed_fields}
-    for _ in range(num_records):
-        rec = f.read(record_len)
-        if not rec or rec[0] == 0x2A:  # deleted record
-            continue
-        for k in needed_fields:
-            start = field_offsets[k]
-            end = start + field_lengths[k]
-            try:
-                val = rec[start:end].decode('latin1', errors='ignore').strip()
-                if val == '' or val is None:
-                    data[k].append(np.nan)
-                else:
-                    data[k].append(float(val))
-            except Exception:
-                data[k].append(np.nan)
-idf = pd.DataFrame(data)
-idf = idf.dropna(subset=needed_fields)
-building_mask = idf['impr_value'] > 10000
-total_buildings = len(idf[building_mask])
-total_population = idf['TotalPop'].sum()
-total_property_value = idf[building_mask]['BLDGVALUE'].sum()
-
-stats = pd.DataFrame([
-    {'Metric': 'Total_Buildings', 'Value': total_buildings, 'Unit': 'count'},
-    {'Metric': 'Total_Population', 'Value': total_population, 'Unit': 'people'},
-    {'Metric': 'Total_Property_Value', 'Value': total_property_value / 1e6, 'Unit': 'million $'}
-])
-stats.to_csv(os.path.join(save_dir, 'TotalNumber_Statistics.csv'), index=False)
-
-# --- Simulation Loop: Read, calculate, and store all results ---
-# Update these paths as needed
 policies_dict = {
     'Baseline': ["Chronic-Baseline-Low_idx", "Chronic-Baseline-Med_idx", "Chronic-Baseline-High_idx"],
     'Protect': ["Untargeted-Chronic-Protect-Low_idx", "Untargeted-Chronic-Protect-Med_idx", "Untargeted-Chronic-Protect-High_idx"],
