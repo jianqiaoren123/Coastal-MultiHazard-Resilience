@@ -22,8 +22,8 @@ The GitHub repository contains the analysis code and processed results. A separa
 | Envision | Agent-based simulation framework | [Envision source code](https://github.com/boltej/Envision) |
 | OrCoast / Tillamook application | Integrated hazard, adaptation, and scenario implementation | Existing repository: http://envweb.bee.oregonstate.edu/GitServer/OrCoast.git ; reviewer access is **pending confirmation** from its maintainer |
 | SFINCS | Coastal inundation submodel | [Deltares SFINCS](https://github.com/Deltares/SFINCS); study configuration within OrCoast; Dollerup v2.1.1 executable and `hydromt-sfincs==1.1.0` |
-| Python analysis and processed results | Per-run metrics, economic analysis, and manuscript reporting | This GitHub repository (**repository URL to insert**) |
-| Representative Envision outputs | Example raw data for inspection and per-run processing | Zenodo `Simulations.zip` (**DOI to insert**) |
+| Python analysis and processed results | Per-run metrics, economic analysis, and manuscript reporting | [Coastal-MultiHazard-Resilience GitHub repository](https://github.com/jianqiaoren123/Coastal-MultiHazard-Resilience) |
+| Representative Envision outputs | Example raw data for inspection and per-run processing | Zenodo `Simulations.zip` ([DOI: 10.5281/zenodo.23720608](https://doi.org/10.5281/zenodo.23720608)) |
 
 ### MUSCLE/TESLA forcing
 
