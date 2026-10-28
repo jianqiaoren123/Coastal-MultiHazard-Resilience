@@ -1,0 +1,20 @@
+parameter,value,description
+discount_rate_central,0.02,"OMB A-4 central real discount rate, 2020-2079"
+discount_rate_2080_2094,0.019,"OMB A-4 real discount rate, 2080-2094"
+discount_rate_2095_2105,0.018,"OMB A-4 real discount rate, 2095-2105"
+discount_rate_high,0.07,Sensitivity: high discount rate
+discount_rate_mid1,0.03,Sensitivity: mid discount rate option 1
+discount_rate_mid2,0.05,Sensitivity: mid discount rate option 2
+discount_rate_low,0.01,Sensitivity: low discount rate
+vsl_central,11400000,"HHS 2020 central Value of Statistical Life, 2020 USD"
+vsl_high,17400000,"HHS 2020 high VSL, 2020 USD"
+vsl_low,5300000,"HHS 2020 low VSL, 2020 USD"
+injury_fraction_serious,0.105,DOT fraction of VSL applied to a Serious injury
+income_elasticity_central,1.1,Robinson & Hammitt (2015) central mortality risk income elasticity
+income_elasticity_high,1.7,Robinson & Hammitt (2015) high mortality risk income elasticity
+income_elasticity_low,0.6,Robinson & Hammitt (2015) low mortality risk income elasticity
+income_growth_oecd,0.015,"OECD (2025) projected annual real income growth rate, central case"
+income_growth_fred,0.029,"FRED 30-year historical average annual real income growth rate, sensitivity case"
+base_year,2020,Present value base year for all discounting
+translate_2018_to_2020,1.112,"Oregon FHFA Housing Price Index factor, 2018 USD to 2020 USD"
+annual_budget_usd,5000000,"Acute scenario annual adaptation budget, USD per year"

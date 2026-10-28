@@ -1,0 +1,4 @@
+Metric,Value,Unit,Description
+Total_Buildings,17246.0,count,Total buildings with impr_value > 10000
+Total_Population,27390.1393487771,people,Total population in Tillamook
+Total_Property_Value,2513.94866,million $,Total building value for buildings with impr_value > 10000
