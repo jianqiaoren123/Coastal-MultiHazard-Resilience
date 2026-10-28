@@ -131,12 +131,12 @@ The representative Zenodo archive contains one selected simulation index per req
 
 ## Code and data availability
 
-- **Python code and full processed results:** this GitHub repository (**URL to insert**).
-- **Representative raw Envision simulations:** Zenodo `Simulations.zip` (**DOI to insert**).
+- **Python code and full processed results:** https://github.com/jianqiaoren123/Coastal-MultiHazard-Resilience.
+- **Representative raw Envision simulations:** Zenodo `Simulations.zip` (DOI: https://doi.org/10.5281/zenodo.23720608; reserved, pending publication). The archive contains representative simulation outputs and required input DBF files. The complete processed ensemble results supporting the manuscript are provided in the GitHub repository.
 - **Envision source:** https://github.com/boltej/Envision.
 - **OrCoast source:** http://envweb.bee.oregonstate.edu/GitServer/OrCoast.git. This is the existing repository address; **access by editors/reviewers has not yet been verified**. A reviewer-accessible or archived manuscript-specific version is being coordinated with its maintainer.
 - **MUSCLE/TESLA code and forcing dataset:** https://doi.org/10.17603/ds2-mr46-5g54.
 - **Shoreline observations and rates:** https://doi.org/10.17603/ds2-59cy-n043.
 - **SFINCS source:** https://github.com/Deltares/SFINCS.
 
-The code and datasets are provided to document and reproduce the analyses in the manuscript. Copyright and licensing terms for this repository and the OrCoast application must be confirmed with the relevant rights holders before release.
+The code and datasets are provided to document and support reproduction of the analyses presented in the manuscript. The representative raw simulation archive does not contain the full simulation ensemble. Copyright and licensing terms for this repository and the OrCoast application must be confirmed with the relevant rights holders before public release.
