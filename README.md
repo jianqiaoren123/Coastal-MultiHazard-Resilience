@@ -96,11 +96,11 @@ The shared economic module includes `econ_common.py`, `assumptions.csv`, and `in
 
 ## Simulation archive and reproducibility scope
 
-The **Zenodo `Simulations.zip` archive contains one representative simulation index for each required scenario**, including Acute, Chronic, Combined, and the two distinct Chronic cost-sensitivity simulation sets. The original baseline `Simulations/IDU/idu.dbf` is not distributed. Baseline aggregate building, population, and property-value statistics are supplied as existing processed CSV inputs in `Results/`, including `TotalNumber_Statistics.csv` and the relevant `TotalNumber_Corner[1–4]_Statistics_PerSim.csv` files. See the README in each analysis folder for scenario-specific inputs. This archive is a **subset of raw Envision simulation outputs**, not the complete Monte Carlo ensemble.
+The **Zenodo `Simulations.zip` archive contains one representative simulation index for each required scenario**, including Acute, Chronic, Combined, and the two distinct Chronic cost-sensitivity simulation sets. Aggregate statistics CSVs in `Results/` are treated as existing inputs to the analysis workflows. See the README in each analysis folder for scenario-specific inputs. This archive is a **subset of raw Envision simulation outputs**, not the complete Monte Carlo ensemble.
 
 The original Acute scenarios contain 1,000 internal Monte Carlo iterations per scenario. The Chronic and Combined analyses use separate simulation/run folders representing Monte Carlo realizations. The released raw examples are intended to document the input structure and permit examination or selected per-run processing; they **cannot by themselves reproduce the complete ensemble**.
 
-The GitHub `Results/` directory contains the **full processed per-run and summary CSV datasets used in the manuscript analyses**. These files, together with the reporting scripts, are intended to support reproduction of ensemble summaries, uncertainty statistics, figures, and tables **without downloading all raw Envision simulation folders**. The baseline-IDU aggregation step has been removed from the redistributed analysis workflow; its aggregate statistics CSVs are treated as existing inputs. The representative archive is not a substitute for the full raw ensemble. To process the representative raw examples, follow the scenario selection and execution instructions in the workflow-specific READMEs.
+The GitHub `Results/` directory contains the **full processed per-run and summary CSV datasets used in the manuscript analyses**. These files, together with the reporting scripts, are intended to support reproduction of ensemble summaries, uncertainty statistics, figures, and tables **without downloading all raw Envision simulation folders**. The representative archive is not a substitute for the full raw ensemble. To process the representative raw examples, follow the scenario selection and execution instructions in the workflow-specific READMEs.
 
 To assemble the data, download the GitHub repository, download `Simulations.zip` from Zenodo, and extract it into the GitHub repository root so that `Simulations/`, `Code/`, and `Results/` are siblings. The archive's contents should be checked after extraction. Do not rename simulation folders, run directories, or input files.
 
@@ -118,7 +118,7 @@ seaborn 0.13.2
 dbfread 2.0.7
 ```
 
-The Python postprocessing and economic analysis were performed on the OSU `oysterville` server running **Rocky Linux 8.10 (Green Obsidian), x86-64**. The host has **two Intel Xeon Gold 6338 processors (2.00 GHz; 32 physical cores each, 64 physical cores / 128 logical CPUs total)** and **250 GiB of installed RAM**. These are host specifications, **not verified minimum requirements** for running the Python scripts. The number of CPU cores and peak memory actually used by each script have not been measured.
+The Python postprocessing and economic analysis were performed on the OSU `oysterville` server running **Rocky Linux 8.10 (Green Obsidian), x86-64**. The host has **two Intel Xeon Gold 6338 processors (2.00 GHz; 32 physical cores each, 64 physical cores / 128 logical CPUs total)** and **250 GiB of installed RAM**. These are host specifications, **not verified minimum requirements** for running the Python scripts. 
 
 The installed versions above were reported from the authors' working environment. The pinned package versions are provided in `requirements.txt`; execution instructions and expected output files are described in the workflow-specific READMEs.
 
@@ -149,7 +149,7 @@ These estimates exclude upstream hazard forcing generation and Envision/OrCoast 
 ## Code and data availability
 
 - **Python code and full processed results:** https://github.com/jianqiaoren123/Coastal-MultiHazard-Resilience.
-- **Representative raw Envision simulations:** Zenodo `Simulations.zip` (DOI: https://doi.org/10.5281/zenodo.23720608). The archive contains representative simulation outputs; the original baseline `idu.dbf` is excluded, with aggregate baseline statistics supplied in processed CSV files. The complete processed ensemble results supporting the manuscript are provided in the GitHub repository.
+- **Representative raw Envision simulations:** Zenodo `Simulations.zip` (DOI: https://doi.org/10.5281/zenodo.23720608). The archive contains representative simulation outputs. Aggregate statistics CSVs are provided in the GitHub `Results/` directory. The complete processed ensemble results supporting the manuscript are provided in the GitHub repository.
 - **Envision source:** https://github.com/boltej/Envision.
 - **OrCoast source:** http://envweb.bee.oregonstate.edu/GitServer/OrCoast.git.
 - **MUSCLE/TESLA code and forcing dataset:** https://doi.org/10.17603/ds2-mr46-5g54.
