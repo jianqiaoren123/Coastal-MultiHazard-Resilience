@@ -20,7 +20,7 @@ The GitHub repository contains the analysis code and processed results. A separa
 | Satellite-derived shoreline observations and change rates | Spatially varying historical shoreline-change inputs | [Taherkhani et al. (2025), DesignSafe, version 2](https://doi.org/10.17603/ds2-59cy-n043); study inputs incorporated in OrCoast |
 | CSZ earthquake and tsunami hazard data | Precomputed acute-hazard layers | OSSPAC (2013); Madin et al. (2013); Priest et al. (2013); study inputs incorporated in OrCoast |
 | Envision | Agent-based simulation framework | [Envision source code](https://github.com/boltej/Envision) |
-| OrCoast / Tillamook application | Integrated hazard, adaptation, and scenario implementation | Existing repository: http://envweb.bee.oregonstate.edu/GitServer/OrCoast.git ; reviewer access is **pending confirmation** from its maintainer |
+| OrCoast / Tillamook application | Integrated hazard, adaptation, and scenario implementation | [OrCoast repository](http://envweb.bee.oregonstate.edu/GitServer/OrCoast.git) |
 | SFINCS | Coastal inundation submodel | [Deltares SFINCS](https://github.com/Deltares/SFINCS); study configuration within OrCoast; Dollerup v2.1.1 executable and `hydromt-sfincs==1.1.0` |
 | Python analysis and processed results | Per-run metrics, economic analysis, and manuscript reporting | [Coastal-MultiHazard-Resilience GitHub repository](https://github.com/jianqiaoren123/Coastal-MultiHazard-Resilience) |
 | Representative Envision outputs | Example raw data for inspection and per-run processing | Zenodo `Simulations.zip` ([DOI: 10.5281/zenodo.23720608](https://doi.org/10.5281/zenodo.23720608)) |
@@ -63,8 +63,7 @@ Coastal-MultiHazard-Resilience/
     ├── Sensitivity/
     │   ├── Chronic_Corner1/
     │   └── Chronic_Corner2/
-    └── IDU/
-        └── idu.dbf
+    └── ... scenario output files
 ```
 
 `Code/`, `Results/`, and this README are distributed through GitHub. `Simulations/` is distributed through **one** Zenodo archive named `Simulations.zip`, which contains the `Simulations/` directory and its existing subdirectories. No scenario or individual file names should be changed during extraction. The scripts use paths anchored to the project directory rather than author-specific server locations.
@@ -97,11 +96,11 @@ The shared economic module includes `econ_common.py`, `assumptions.csv`, and `in
 
 ## Simulation archive and reproducibility scope
 
-The **Zenodo `Simulations.zip` archive contains one representative simulation index for each required scenario**, including Acute, Chronic, Combined, and the two distinct Chronic cost-sensitivity simulation sets. It also includes the IDU/DBF inputs required for processing the selected examples. This archive is a **subset of raw Envision simulation outputs**, not the complete Monte Carlo ensemble.
+The **Zenodo `Simulations.zip` archive contains one representative simulation index for each required scenario**, including Acute, Chronic, Combined, and the two distinct Chronic cost-sensitivity simulation sets. The original baseline `Simulations/IDU/idu.dbf` is not distributed. Baseline aggregate building, population, and property-value statistics are supplied as existing processed CSV inputs in `Results/`, including `TotalNumber_Statistics.csv` and the relevant `TotalNumber_Corner[1–4]_Statistics_PerSim.csv` files. See the README in each analysis folder for scenario-specific inputs. This archive is a **subset of raw Envision simulation outputs**, not the complete Monte Carlo ensemble.
 
 The original Acute scenarios contain 1,000 internal Monte Carlo iterations per scenario. The Chronic and Combined analyses use separate simulation/run folders representing Monte Carlo realizations. The released raw examples are intended to document the input structure and permit examination or selected per-run processing; they **cannot by themselves reproduce the complete ensemble**.
 
-The GitHub `Results/` directory contains the **full processed per-run and summary CSV datasets used in the manuscript analyses**. These files, together with the reporting scripts, are intended to support reproduction of ensemble summaries, uncertainty statistics, figures, and tables **without downloading all raw Envision simulation folders**. The scripts retain their original full-ensemble configurations; they have not been rewritten solely to execute automatically against the representative subset. Running a selected per-run analysis on the sample may require selecting the corresponding index in the script. No full end-to-end validation of the redistributed package is claimed here.
+The GitHub `Results/` directory contains the **full processed per-run and summary CSV datasets used in the manuscript analyses**. These files, together with the reporting scripts, are intended to support reproduction of ensemble summaries, uncertainty statistics, figures, and tables **without downloading all raw Envision simulation folders**. The baseline-IDU aggregation step has been removed from the redistributed analysis workflow; its aggregate statistics CSVs are treated as existing inputs. The representative archive is not a substitute for the full raw ensemble. To process the representative raw examples, follow the scenario selection and execution instructions in the workflow-specific READMEs.
 
 To assemble the data, download the GitHub repository, download `Simulations.zip` from Zenodo, and extract it into the GitHub repository root so that `Simulations/`, `Code/`, and `Results/` are siblings. The archive's contents should be checked after extraction. Do not rename simulation folders, run directories, or input files.
 
@@ -121,22 +120,44 @@ dbfread 2.0.7
 
 The Python postprocessing and economic analysis were performed on the OSU `oysterville` server running **Rocky Linux 8.10 (Green Obsidian), x86-64**. The host has **two Intel Xeon Gold 6338 processors (2.00 GHz; 32 physical cores each, 64 physical cores / 128 logical CPUs total)** and **250 GiB of installed RAM**. These are host specifications, **not verified minimum requirements** for running the Python scripts. The number of CPU cores and peak memory actually used by each script have not been measured.
 
-The installed versions above were reported from the authors' working environment. The pinned package versions are provided in `requirements.txt`. The scripts have undergone path updates and Python syntax checks, but **a complete execution test against the redistributed datasets has not yet been documented**. Installation time, example commands, and verified expected outputs remain to be documented.
+The installed versions above were reported from the authors' working environment. The pinned package versions are provided in `requirements.txt`; execution instructions and expected output files are described in the workflow-specific READMEs.
+
+### Installation
+
+On Linux (or macOS), install Python 3.13 and then run:
+
+```bash
+git clone https://github.com/jianqiaoren123/Coastal-MultiHazard-Resilience.git
+cd Coastal-MultiHazard-Resilience
+python -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements.txt
+```
+
+The commands assume that `python` resolves to a suitable Python 3.13 installation and that the repository is accessible to the user. To work with representative raw outputs, download the associated Zenodo `Simulations.zip` archive and extract it into the repository root, as described above. Follow the workflow-specific `Code/*/README.md` instructions for analysis order and output locations. The repository includes processed results needed for downstream reporting without rerunning the full raw ensemble.
 
 ### Estimated Python analysis runtime
 
-The complete manuscript analysis used approximately **27 Python scripts**: Acute (3), Chronic (2), Combined (2), EconomicAnalysis (12), and Sensitivity (8). Based on the authors' experience, **26 scripts typically required approximately 3–5 minutes each**, while **one computationally intensive Combined analysis script required approximately 6 hours** to process the full ensemble. Assuming **uninterrupted, sequential execution** with no pauses or failures, the estimated total is **438–490 minutes (approximately 7 hours 18 minutes to 8 hours 10 minutes)**. These are retrospective estimates, **not independently measured benchmarks**, and exclude all upstream forcing generation and Envision/OrCoast/SFINCS simulations. They also do not establish minimum CPU or RAM requirements.
+The Python postprocessing workflows were executed on an Oregon State University Linux computing server (Rocky Linux 8.10, dual Intel Xeon Gold 6338 CPUs, 250 GiB RAM).
 
-The representative Zenodo archive contains one selected simulation index per required scenario, while the Acute demonstration retains the three scenario outputs with their internal 1,000 Monte Carlo iterations. The existing Python scripts retain their full-ensemble configuration. **Execution time for a selected-index demonstration has not yet been benchmarked**; no proportional speedup is claimed. A future test may refine these estimates and document any index selection needed to process the reduced raw archive.
+Individual Python analysis, economic calculation, and plotting scripts generally require several seconds to several minutes, depending on the input data and simulation configuration. The most computationally intensive script, `BothHazard_analysis_detailed_results_PerSim.py`, required approximately **6 hours** to process a configuration involving **1,000 acute iterations and 50 chronic simulations**.
+
+The complete Python postprocessing workflow is estimated to require approximately **7–8 hours** when executed sequentially on the reported server. This is an approximate estimate rather than a benchmark of every script. Runtime may vary with the computing environment and simulation configuration.
+
+These estimates exclude upstream hazard forcing generation and Envision/OrCoast simulations. Execution time for the smaller representative Zenodo dataset may differ from the full-workflow estimate.
 
 ## Code and data availability
 
 - **Python code and full processed results:** https://github.com/jianqiaoren123/Coastal-MultiHazard-Resilience.
-- **Representative raw Envision simulations:** Zenodo `Simulations.zip` (DOI: https://doi.org/10.5281/zenodo.23720608; reserved, pending publication). The archive contains representative simulation outputs and required input DBF files. The complete processed ensemble results supporting the manuscript are provided in the GitHub repository.
+- **Representative raw Envision simulations:** Zenodo `Simulations.zip` (DOI: https://doi.org/10.5281/zenodo.23720608). The archive contains representative simulation outputs; the original baseline `idu.dbf` is excluded, with aggregate baseline statistics supplied in processed CSV files. The complete processed ensemble results supporting the manuscript are provided in the GitHub repository.
 - **Envision source:** https://github.com/boltej/Envision.
-- **OrCoast source:** http://envweb.bee.oregonstate.edu/GitServer/OrCoast.git. This is the existing repository address; **access by editors/reviewers has not yet been verified**. A reviewer-accessible or archived manuscript-specific version is being coordinated with its maintainer.
+- **OrCoast source:** http://envweb.bee.oregonstate.edu/GitServer/OrCoast.git.
 - **MUSCLE/TESLA code and forcing dataset:** https://doi.org/10.17603/ds2-mr46-5g54.
 - **Shoreline observations and rates:** https://doi.org/10.17603/ds2-59cy-n043.
 - **SFINCS source:** https://github.com/Deltares/SFINCS.
 
-The code and datasets are provided to document and support reproduction of the analyses presented in the manuscript. The representative raw simulation archive does not contain the full simulation ensemble. Copyright and licensing terms for this repository and the OrCoast application must be confirmed with the relevant rights holders before public release.
+The code and datasets are provided to document and support reproduction of the analyses presented in the manuscript. The representative raw simulation archive does not contain the full simulation ensemble.
+
+## Licensing
+
+The **Python analysis code** developed for this repository is released under the **MIT License** (see [`LICENSE`](LICENSE)). This license does **not** automatically apply to the processed research datasets (including CSV files) in `Results/`, or to the separate Zenodo simulation archive. The Zenodo dataset is distributed under the license specified on its Zenodo record (CC BY 4.0). Third-party datasets and the upstream Envision, OrCoast, and SFINCS software remain subject to their respective licenses and applicable redistribution terms.
