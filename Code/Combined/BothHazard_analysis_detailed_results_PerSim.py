@@ -13,8 +13,7 @@ start_time = time.time()
 # runtime: 50 Chronic simulations x 1000 Acute iterations takes about 6 hours to run.
 
 # --- Parameters and paths ---
-# idx_range = range(0, 50) # ONLY simulations 1-9 are available for this code (running Acute in the Combined)
-idx_range = range(26, 28)  # For testing with fewer simulations
+idx_range = range(0, 50) # ONLY simulations 1-9 are available for this code (running Acute in the Combined)
 policies = ['AC1', 'AC3-A', 'AC3', 'AC3-C']
 proactive_policies = ['AC3-A', 'AC3', 'AC3-C']
 slr_scenarios = ['Low', 'Med', 'High']
