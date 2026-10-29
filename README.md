@@ -136,9 +136,27 @@ python -m pip install -r requirements.txt
 
 The commands assume that `python` resolves to a suitable Python 3.13 installation and that the repository is accessible to the user. To work with representative raw outputs, download the associated Zenodo `Simulations.zip` archive and extract it into the repository root, as described above. Follow the workflow-specific `Code/*/README.md` instructions for analysis order and output locations. The repository includes processed results needed for downstream reporting without rerunning the full raw ensemble.
 
-**Estimated installation time:** Approximately 5–15 minutes on a typical desktop computer with Python 3.13 already installed and an internet connection, excluding the time required to download the Zenodo simulation archive.
+**Estimated installation time:** Approximately 5–15 minutes on a typical desktop with Python 3.13 already installed and an internet connection, excluding download of the Zenodo simulation archive. This estimate covers the Python postprocessing dependencies, not installation of upstream Envision/OrCoast, SFINCS, or MUSCLE/TESLA software. No specialized hardware is required for the Python postprocessing demonstration.
 
-This estimate covers installation of the Python analysis dependencies only. It does not include installation or configuration of the upstream Envision/OrCoast, SFINCS, or MUSCLE/TESLA modeling components.
+### Demo: Running representative simulations
+
+The Zenodo archive provides representative simulation outputs for examining the postprocessing workflow. Before running a demo, **copy the entire `Results/` directory to a safe location**, because analysis and economic scripts write CSVs with the same names as the published full-ensemble results. Run commands from the repository root using `python Code/<workflow>/<script>.py` after installing the dependencies and extracting `Simulations.zip` into the repository root.
+
+For the representative simulation **index 0**, temporarily change the following settings in your local copy of the scripts (do not commit the demo changes to the main repository):
+
+| Workflow | Script | Demo setting |
+|---|---|---|
+| Acute | `Code/Acute/AcuteHazard_analysis_detailed_results_PerSim.py` | Keep `N_ITER = 1000`; use the archived acute scenarios. |
+| Chronic | `Code/Chronic/ChronicHazard_analysis_detailed_results_PerSim.py` | Set `idx_range = range(0, 1)` (instead of `range(0, 50)`). |
+| Combined | `Code/Combined/BothHazard_analysis_detailed_results_PerSim.py` | Set `idx_range = range(0, 1)` (instead of the current `range(0, 50)`); keep `n_iter_acute = 1000`. |
+| Sensitivity | `Code/Sensitivity/ChronicHazard_Corner[1–4]_analysis_detailed_results_PerSim.py` | In each of the four scripts, set `idx_range = range(0, 1)` (instead of `range(0, 50)`). |
+| Economic analysis | `Code/EconomicAnalysis/*_economics_PerSim.py` | These scripts read the `Sim_*` columns in their processed CSV inputs; no raw simulation-index range needs to be set in the main economic scripts. |
+
+**Single-simulation diagnostic adjustment:** The Chronic script's coefficient-of-variation convergence section assumes at least 20 simulations; for a one-simulation demo, skip its final `# --- CoV for cumulative simulation ranges ---` block. In each Sensitivity analysis script, skip the final convergence block beginning with `simulation_counts = list(range(20, ...))`. These convergence statistics are not meaningful for one simulation; the preceding per-simulation CSVs are the demonstration outputs. Full-ensemble plotting/reporting scripts should be run against the published full-ensemble `Results/` inputs, not against one-simulation summaries.
+
+**Expected outputs and comparison:** The analysis scripts write their standard `Statistics_*_PerSim.csv` files into `Results/Acute`, `Results/Chronic`, `Results/Combined`, and `Results/Sensitivity`; economic scripts write their `Results_*_Economics_*_PerSim.csv` files into `Results/EconomicAnalysis`. See each workflow-specific README for exact filenames. Compare the demo's **`Sim_0`** column with the **`Sim_0`** column in the corresponding backed-up, published full-ensemble `_PerSim.csv` file, matching rows by scenario, policy, hazard, metric, and year. With only one simulation, aggregate standard deviations, confidence intervals, and convergence statistics are not comparable to the full ensemble.
+
+**Estimated demo runtime:** Approximately **1–1.5 hours** for the representative postprocessing demonstration on a typical desktop, excluding installation and downloads. Actual runtime depends on the desktop computer and selected workflows. The full manuscript postprocessing runtime is described separately below.
 
 ### Estimated Python analysis runtime
 
