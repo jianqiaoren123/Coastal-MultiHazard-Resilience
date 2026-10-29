@@ -136,6 +136,10 @@ python -m pip install -r requirements.txt
 
 The commands assume that `python` resolves to a suitable Python 3.13 installation and that the repository is accessible to the user. To work with representative raw outputs, download the associated Zenodo `Simulations.zip` archive and extract it into the repository root, as described above. Follow the workflow-specific `Code/*/README.md` instructions for analysis order and output locations. The repository includes processed results needed for downstream reporting without rerunning the full raw ensemble.
 
+**Estimated installation time:** Approximately 5–15 minutes on a typical desktop computer with Python 3.13 already installed and an internet connection, excluding the time required to download the Zenodo simulation archive.
+
+This estimate covers installation of the Python analysis dependencies only. It does not include installation or configuration of the upstream Envision/OrCoast, SFINCS, or MUSCLE/TESLA modeling components.
+
 ### Estimated Python analysis runtime
 
 The Python postprocessing workflows were executed on an Oregon State University Linux computing server (Rocky Linux 8.10, dual Intel Xeon Gold 6338 CPUs, 250 GiB RAM).
